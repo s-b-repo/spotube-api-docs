@@ -1,10 +1,6 @@
 ConnectServer API Documentation
 
 This document provides an overview and detailed explanation of the ConnectServer API. The API facilitates the connection between clients and the server using WebSockets and provides functionalities to manage playback in a media application.
-
-ConnectServer API Documentation
-
-This document provides an overview and detailed explanation of the ConnectServer API. The API facilitates the connection between clients and the server using WebSockets and provides functionalities to manage playback in a media application.
 Table of Contents
 
     Getting Started
