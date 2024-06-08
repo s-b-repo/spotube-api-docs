@@ -280,3 +280,135 @@ Volume Event
   "event": "volume",
   "data": 0.8
 }
+Connect Clients Provider Documentation
+
+This documentation provides an overview and detailed explanation of the ConnectClientsNotifier class and the associated provider, which is used to discover and manage network services using the Bonsoir package.
+
+Overview
+
+The ConnectClientsNotifier class is part of a Flutter application that discovers network services using the Bonsoir package. It leverages Riverpod for state management. This class listens for service discovery events, updates the state accordingly, and provides methods to resolve and clear resolved services.
+Dependencies
+
+Ensure the following Dart packages are included in your pubspec.yaml:
+
+yaml
+
+dependencies:
+  bonsoir: ^2.0.0
+  flutter_riverpod: ^1.0.3
+  spotube:
+    git:
+      url: https://github.com/KRTirtho/spotube.git
+
+ConnectClientsState
+
+The ConnectClientsState class holds the state for discovered services and the current resolved service.
+Properties
+
+    List<BonsoirService> services: A list of discovered services.
+    ResolvedBonsoirService? resolvedService: The currently resolved service, if any.
+    BonsoirDiscovery discovery: The Bonsoir discovery instance.
+
+Methods
+
+    ConnectClientsState copyWith({List<BonsoirService>? services, BonsoirDiscovery? discovery, ResolvedBonsoirService? resolvedService}): Returns a copy of the state with the provided values.
+
+ConnectClientsNotifier
+
+The ConnectClientsNotifier class extends AsyncNotifier and manages the state of discovered services using the Bonsoir package.
+Methods
+build() async
+
+Initializes the Bonsoir discovery, listens for discovery events, and updates the state accordingly.
+Future<void> resolveService(BonsoirService service) async
+
+Resolves the provided service and updates the state with the resolved service.
+Future<void> clearResolvedService() async
+
+Clears the resolved service from the state.
+Discovery Event Handling
+
+    discoveryServiceFound: Adds the newly found service to the state.
+    discoveryServiceResolved: Updates the state with the resolved service.
+    discoveryServiceLost: Removes the lost service from the state and clears the resolved service if it was the one that got lost.
+
+Providers
+connectClientsProvider
+
+Defines the provider for ConnectClientsNotifier.
+
+dart
+
+final connectClientsProvider =
+    AsyncNotifierProvider<ConnectClientsNotifier, ConnectClientsState>(
+  () => ConnectClientsNotifier(),
+);
+
+Usage
+Example Usage in a Flutter Widget
+
+dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spotube/provider/connect/clients.dart';
+
+class ConnectClientsWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final connectClientsState = watch(connectClientsProvider);
+
+    return connectClientsState.when(
+      data: (state) {
+        final services = state.services;
+        return ListView.builder(
+          itemCount: services.length,
+          itemBuilder: (context, index) {
+            final service = services[index];
+            return ListTile(
+              title: Text(service.name),
+              subtitle: Text(service.type),
+              onTap: () {
+                context
+                    .read(connectClientsProvider.notifier)
+                    .resolveService(service);
+              },
+            );
+          },
+        );
+      },
+      loading: () => CircularProgressIndicator(),
+      error: (error, stack) => Text('Error: $error'),
+    );
+  }
+}
+
+Example Usage in Main Application
+
+dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spotube/provider/connect/clients.dart';
+
+void main() {
+  runApp(
+    ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Connect Clients'),
+        ),
+        body: ConnectClientsWidget(),
+      ),
+    );
+  }
+}
